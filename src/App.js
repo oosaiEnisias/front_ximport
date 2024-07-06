@@ -2,7 +2,7 @@ import './base.css';
 // import { read } from 'xlsx';
 import * as XLSX from 'xlsx';
 import { useState, useRef } from 'react';
-
+import { useImmer } from 'use-immer';
 
 export default function App() {
     // エクセルテーブル表示用
@@ -27,6 +27,10 @@ export default function App() {
     });
     // workbook
     const [workbook, setWorkBook] = useState(null);
+    // 列項目リスト
+    // const [columnTrList, setColumnTrList] = useState([]);
+    const [columnTrList, updateColumnTrList] = useImmer([]);
+    const [activeRow, setActiveRow] = useState({id: null, btn: null, rangeStartFlg: true});
 
     // ファイル変更
     function changeFile(e) {
@@ -102,6 +106,9 @@ export default function App() {
 
         // TODO:
         setTableObjData(Object.assign({0: tempColumn}, ttTable));
+
+        // TODO:列データ削除
+        updateColumnTrList([]);
     }
 
 
@@ -205,6 +212,7 @@ export default function App() {
 
 
     var htmlDisplay = <tr><td>test</td></tr>;
+    // var trListDisplay = <tr><td>test</td></tr>;
     var sheetNameOption = <option value=""> --- </option>;
 
     // エクセル表表示
@@ -214,20 +222,97 @@ export default function App() {
                     <tr id={key} className={`Tr${key}`}>
                         {
                             Object.entries(val).map(([k, v]) => {
-                                return (<td id={k} className={`Td${k}`}>{v['w']}</td>)
+                                return (<td id={k} className={`Td${k}`} onClick={e => {tableTdClick(e, v['w'], k)}}>{v['w']}</td>)
                             })
                         }
                     </tr>
             );
         });
     }
-    
     // シート名設定
     if(typeof(sheetNameList) === 'object' && sheetNameList != null) {
         sheetNameOption = Object.entries(sheetNameList).map(([key, value]) => {
             return <option value={key}>{value}</option>;
         });
     }
+
+    // 表示しているTdのクリック
+    function tableTdClick(e, val, position) {
+        e.stopPropagation(); e.preventDefault();
+        if(activeRow.id !== null) {
+            if(activeRow.btn === 'head') {
+                updateColumnTrList(draft => {
+                    const tr = draft.find(a => a.id === activeRow.id);
+                    tr[activeRow.btn].val = val;
+                    tr.position.val = position;
+                });
+            }
+            else if(activeRow.btn === 'range') {
+                if(activeRow.rangeStartFlg) {
+                    updateColumnTrList(draft => {
+                        const tr = draft.find(a => a.id === activeRow.id);
+                        tr.range.val = '';
+                        tr.range.val = position;
+                    });
+                }
+                else {
+                    updateColumnTrList(draft => {
+                        const tr = draft.find(a => a.id === activeRow.id);
+                        tr.range.val = tr.range.val + '-' + position;
+                    });
+                }
+            }
+
+            // 現在行変更
+            setActiveRow({id: activeRow.id, btn: activeRow.btn, rangeStartFlg: !activeRow.rangeStartFlg});            
+        }
+    }
+
+    // TODO:不要になったら消す
+    // // カラム列Tr表示
+    // if(Array.isArray(columnTrList) === true && columnTrList.length > 0) {
+    //     trListDisplay = columnTrList.map((obj) => {
+    //         return (<ColumnTrLine 
+    //             id={obj.id}
+    //             headVal={obj.headVal}
+    //             position={obj.position}
+    //             range={obj.range}
+    //             parentGroup={obj.parentGroup}
+    //         />);
+    //     });
+    // }
+
+    function TrLineDisplay({tr}) {
+        if(Array.isArray(tr) === true && tr.length > 0) {
+            let trListDisplay = columnTrList.map((obj) => {
+            return (<ColumnTrLine 
+                    id={obj.id}
+                    head={obj.head}
+                    position={obj.position}
+                    range={obj.range}
+                    parentGroup={obj.parentGroup}
+                />);
+            });
+            return trListDisplay;
+            // trListDisplay = 
+        //     return (
+        //     <>
+        //         {
+        //             tr.map((obj) => {
+        //                 <ColumnTrLine 
+        //                     id={obj.id}
+        //                     headVal={obj.headVal}
+        //                     position={obj.position}
+        //                     range={obj.range}
+        //                     parentGroup={obj.parentGroup}
+        //                 />
+        //             })
+        //         }
+        //     </>            
+        // );
+        }
+    }
+
     
     function changeRangeStart(e) {
         excelOtherData.current.rangeStart = e.target.value;
@@ -237,38 +322,185 @@ export default function App() {
         excelOtherData.current.rangeEnd = e.target.value;
     }
 
+    // function ColumnAdd() {
+    //     return (
+    //         <>
+    //             <div className='Pd10'>
+    //                 <span><button>ヘッダ追加</button></span>
+    //             </div>
+    //             <div className='Container Pd10'>
+    //                 <div>
+    //                     <div>ヘッダ</div>
+    //                     <div><input type="text" value="部門CD" /></div>
+    //                 </div>
+    //                 <div>
+    //                     <div>列位置</div>
+    //                     <div>
+    //                         <input type="text" value="B172" className='Wid30' />
+    //                         <button className='MgL5'>列位置指定</button>
+    //                     </div>
+    //                 </div>
+    //                 <div>
+    //                     <div>ヘッダに紐づく範囲</div>
+    //                     <div>
+    //                         <input type="text" value="B185-191" className='Wid30' />
+    //                         <button className='MgL5'>範囲指定</button>
+    //                     </div>
+    //                 </div>
+    //                 <div>
+    //                     <div>親グループ</div>
+    //                     <div><input type="checkbox" value="true" /></div>
+    //                 </div>
+    //             </div>
+    //         </>
+    //     );
+    // }
+
+
+    // 列指定領域
+    function ColumnAdd() {
+        return (
+            <>
+                <div className='Pd10'>
+                    <span><button onClick={columnTrAddButton}>ヘッダ追加</button></span>
+                </div>
+                <table>
+                    <thead>
+                        <th className='tdCenter'>ヘッダ</th>
+                        <th className='tdCenter'>列位置</th>
+                        <th className='tdCenter'>ヘッダ範囲</th>
+                        <th className='tdCenter'>親グループ</th>
+                    </thead>
+                    <tbody>
+                        <TrLineDisplay tr={columnTrList} />
+                    </tbody>
+                </table>
+            </>
+        );
+    }
+
+    // ヘッダ追加ボタン押下時
+    function columnTrAddButton() {
+        let id = 'column' + columnTrList.length;
+        updateColumnTrList([
+            ...columnTrList,
+            {id, head: {val: null, color: null}, position: {val: null, color: null}, range: {val: null, color: null}, parentGroup: null}
+        ]);
+    }
+
+    // 列追加ColumnTrLine
+    function ColumnTrLine({id, head, position, range, parentGroup}) {
+        // let no = columnTrList.length;
+        // let headValColor = headVal.color === 'ActiveButton' ? '' : 'ActiveButton';
+
+        return (
+            <tr key={id}>
+                <td className='tdCenter'>
+                    <input type="text" value={head.val} className='Wid30' onChange={e => {targetChangeVal(id, 'head', e)}} />
+                    <button className={`MgL5 ${head.color}`} onClick={e => {targetBtnOn(id, 'head', e)}}>ヘッダ指定</button>
+                </td>
+                <td className='tdCenter'>
+                    <input type="text" value={position.val} className='Wid30' onChange={e => {targetChangeVal(id, 'position', e)}} />
+                    <button className={`MgL5 ${position.color}`} onClick={e => {targetBtnOn(id, 'position', e)}}>列位置指定</button>
+                </td>
+                <td className='tdCenter'>
+                    <input type="text" value={range.val} className='Wid30' onChange={e => {targetChangeVal(id, 'range', e)}} />
+                    <button className={`MgL5 ${range.color}`} onClick={e => {targetBtnOn(id, 'range', e)}}>範囲指定</button>
+                </td>
+                <td className='tdCenter'>
+                    <input type="checkbox" checked={parentGroup} />
+                </td>
+            </tr>
+        );
+    }
+
+    // // ヘッダを指定する処理
+    // function targetHead(id) {
+    //     updateColumnTrList(draft => {
+    //         const tr = draft.find(a => a.id === id);
+    //         tr.head.color = 'ActiveButton';
+    //         tr.position.color = 'ActiveButton';
+    //         tr.range.color = 'ActiveButton';
+    //     });
+    // }
+    function targetBtnOn(id, btnName, e) {
+        e.stopPropagation(); e.preventDefault();
+
+        setActiveRow({id: id, btn: btnName, rangeStartFlg: true});
+        let btnList = ['head', 'position', 'range'];        
+        updateColumnTrList(draft => {
+            // const tr = draft.find(a => a.id === id);
+            draft.map(d => {
+                if(d.id === id) {
+                    for(const btn of btnList) {
+                        if(btn === btnName) {
+                            d[btn].color = 'ActiveButton';
+                        }
+                        else {
+                            d[btn].color = '';
+                        }
+                    }
+                }
+                else {
+                    d.head.color = '';
+                    d.position.color = '';
+                    d.range.color = '';
+                }
+            });            
+        });
+    }
+
+    function targetChangeVal(id, btnName, e) {
+        e.stopPropagation(); e.preventDefault();
+        updateColumnTrList(draft => {
+            const tr = draft.find(a => a.id === id);
+            tr[btnName].val = e.target.value;
+        });
+    }
+    
+
+
+    // =======================================================================================
+    // 画面表示
     return (
         <>
-            <div className="Pd10">
-                <div>
-                    <span className='Pd10'>
-                        <input type="file" id="fileUpload" name="fileUpload" onChange={changeFile} /> 
-                    </span>
-                    <span className='Pd10'>
-                        シート名選択：<select onChange={changeFileSheet}>
-                            {sheetNameOption}                           
-                        </select>
-                    </span>
-                    <span className='Pd10'>
-                        <span className='PdR5'>
-                            <button onClick={selectRange}>
-                                表示範囲指定
-                            </button>
+            <div className='ColumnDiv'>
+                {/* エクセル表示 */}
+                <div className="Pd10">
+                    {/* 一行目領域 */}
+                    <div>
+                        {/* ファイル選択 */}
+                        <span className='Pd10'>
+                            <input type="file" id="fileUpload" name="fileUpload" onChange={changeFile} /> 
                         </span>
-                        <input type="text" id="rangeTop" name="rangeTop" value={excelOtherData.rangeStart} onChange={changeRangeStart} size="3" />：
-                        <input type="text" id="rangeEnd" name="rangeEnd" value={excelOtherData.rangeEnd} onChange={changeRangeEnd} size="3" />
-                    </span>
+                        {/* シート名選択 */}
+                        <span className='Pd10'>
+                            シート名選択：<select onChange={changeFileSheet}>
+                                {sheetNameOption}                           
+                            </select>
+                        </span>
+                        {/* 表示範囲指定 */}
+                        <span className='Pd10'>
+                            <span className='PdR5'>
+                                <button onClick={selectRange}>
+                                    表示範囲指定
+                                </button>
+                            </span>
+                            <input type="text" id="rangeTop" name="rangeTop" value={excelOtherData.rangeStart} onChange={changeRangeStart} size="3" />：
+                            <input type="text" id="rangeEnd" name="rangeEnd" value={excelOtherData.rangeEnd} onChange={changeRangeEnd} size="3" />
+                        </span>
+                    </div>
+                    {/* 一行目領域の終わり */}
+                    <div className='Pd10'>
+                        エクセル表示領域：最終行：{lastRowNum}
+                        <table className='ExcelHtmlDisplay'>
+                            {htmlDisplay}
+                        </table>
+                    </div>
                 </div>
-                <div className='Pd10'>
-                    エクセル表示領域：
-                </div>
-                <div>
-                    {lastRowNum} /
-                </div>
-                <div>
-                    <table className='ExcelHtmlDisplay'>
-                        {htmlDisplay}
-                    </table>
+                {/* 取込列指定 */}
+                <div className="Pd10">
+                    <ColumnAdd />                   
                 </div>
             </div>
         </>

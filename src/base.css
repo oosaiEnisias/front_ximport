@@ -1,3 +1,5 @@
+/* ============================================ */
+/* Padding, Margin */
 .Pd10 {
     padding: 10px;
 }
@@ -7,7 +9,31 @@
 .Mg10 {
     margin: 10px;
 }
-
+.MgL5 {
+    margin-left: 5px;
+}
+.MgL10 {
+    margin-left: 10px;
+}
+/* ============================================ */
+/* Div */
+.ColumnDiv {
+    display: flex;
+}
+/* ============================================ */
+/* Gird */
+.Container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 10px;
+}
+/* ============================================ */
+/* テーブル */
+.tdCenter {
+    text-align: center;
+}
+/* ============================================ */
+/* エクセル */
 .ExcelHtmlDisplay {
     border: solid;
 }
@@ -23,8 +49,19 @@
 .ExcelHtmlDisplay > tr > td {
     border: 0.5px dotted;
 }
-
-
+/* ============================================ */
+/* 縦横比 */
+.Wid30 {
+    width: 30%;
+}
+.Wid50 {
+    width: 50%;
+}
+/* ============================================ */
+/* 色 */
+.ActiveButton {
+    background-color: aqua;
+}
 /* tr#0 {
     border: thick double #32a1ce;
 } */
