@@ -1,0 +1,30 @@
+.Pd10 {
+    padding: 10px;
+}
+.PdR5 {
+    padding-right: 5px;
+}
+.Mg10 {
+    margin: 10px;
+}
+
+.ExcelHtmlDisplay {
+    border: solid;
+}
+
+.ExcelHtmlDisplay > tr.Tr0 > td {
+    border: thick double #32a1ce;
+}
+
+.ExcelHtmlDisplay > tr > td.TdNo {
+    border: thick double #32a1ce;
+}
+
+.ExcelHtmlDisplay > tr > td {
+    border: 0.5px dotted;
+}
+
+
+/* tr#0 {
+    border: thick double #32a1ce;
+} */
