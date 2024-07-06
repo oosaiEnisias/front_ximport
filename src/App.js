@@ -2,18 +2,11 @@ import './base.css';
 // import { read } from 'xlsx';
 import * as XLSX from 'xlsx';
 import { useState, useRef } from 'react';
-// // react-bootstrap
-// import Table from 'react-bootstrap/Table';
 
-// let workbook;
-// let tableObjData = null;
-// // 最終行数
-// let lastRowNum = 1;
 
 export default function App() {
     // エクセルテーブル表示用
     const [tableObjData, setTableObjData] = useState(null);
-    // const [displayTable, setDisplayTable] = useState(null);
     // 最終行
     const [lastRowNum, setLastRowNum] = useState(0);
     // シート名
@@ -32,7 +25,6 @@ export default function App() {
         // 列リスト
         , columnList: new Set()
     });
-    // let appTableData = null;
     // workbook
     const [workbook, setWorkBook] = useState(null);
 
@@ -112,27 +104,6 @@ export default function App() {
         setTableObjData(Object.assign({0: tempColumn}, ttTable));
     }
 
-    // TODO:
-    // // 全データ取得
-    // function getAllData(tempTable) {
-    //     let tKey = null;
-    //     let regex = new RegExp(/[^0-9]/g);
-    //     let tTable = {};
-
-    //     for(let key in tempTable) {
-    //         tTable = tTable = setTableColum(tTable, tKey, key, regex, tempTable);
-    //         // // 数字のみ抜き出し
-    //         // tKey = key.replace(regex, '');
-
-    //         // // 数字をテーブルキーに設定
-    //         // if(tTable[tKey] === undefined) {
-    //         //     tTable[tKey] = {No: {w: tKey}};
-    //         // }
-    //         // tTable[tKey][key] = tempTable[key];
-    //     }
-
-    //     return tTable;
-    // }
 
     // 範囲指定のデータ取得
     function getPointingRange(tempTable, sheetRange) {
@@ -140,12 +111,6 @@ export default function App() {
         let regex = new RegExp(/[^0-9]/g);
         let tTable = {};
 
-        // TODO:
-        // まずは数字で範囲を指定する①
-        // let sheetRange = XLSX.utils.decode_range("A170:J199");
-        // 現在のシート範囲を取得
-        // let sheetRange = XLSX.utils.decode_range(excelOtherData.current.rangeStart + ':' + excelOtherData.current.rangeEnd);        
-        
         let address;
         let cell;
         // TODO:要考慮
@@ -189,6 +154,7 @@ export default function App() {
         return tTable;
     }
 
+    // 表項目に値を設定
     function setTableColum(tTable, tKey, key, regex, tempTable) {
         let alphaRegex = new RegExp(/[^A-Z]/g);
         let alphaColumn = null;
@@ -238,18 +204,6 @@ export default function App() {
     }
 
 
-    // // ファイル表示
-    // function excelDisplay() {
-    //     // // TODO:
-    //     // console.log('tableObjData ===============================');
-    //     // console.log(tableObjData);
-    //     // let tempTableDisplay = Object.entries(tableObjData).map(([key,val]) => {
-    //     //     return <tr><td id={key}>{val}</td></tr>;
-    //     // });
-    //     // setDisplayTable(tempTableDisplay);
-    // }
-
-
     var htmlDisplay = <tr><td>test</td></tr>;
     var sheetNameOption = <option value=""> --- </option>;
 
@@ -265,9 +219,9 @@ export default function App() {
                         }
                     </tr>
             );
-            // return <tr><td id={key}>{val['v']}</td></tr>;
         });
     }
+    
     // シート名設定
     if(typeof(sheetNameList) === 'object' && sheetNameList != null) {
         sheetNameOption = Object.entries(sheetNameList).map(([key, value]) => {
