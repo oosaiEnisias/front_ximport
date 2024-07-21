@@ -34,8 +34,18 @@
 }
 /* ============================================ */
 /* エクセル */
+/* 以下は画面サイズが1024px以上になったら適応されます */
 .ExcelHtmlDisplay {
     border: solid;
+    /* width: 800px;  */
+    max-width: 900px;
+    height: 800px;
+
+    display: block;
+    overflow-x: scroll;
+    overflow-y: scroll;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
 }
 
 .ExcelHtmlDisplay > tr.Tr0 > td {
@@ -51,16 +61,34 @@
 }
 /* ============================================ */
 /* 縦横比 */
-.Wid30 {
-    width: 30%;
+.Wid100 {
+    width: 100%;
 }
 .Wid50 {
     width: 50%;
 }
+.Wid30 {
+    width: 30%;
+}
+.Wid20 {
+    width: 20%;
+}
+
+.Wid700px {
+    min-width: 700px;
+}
+
 /* ============================================ */
 /* 色 */
 .ActiveButton {
-    background-color: aqua;
+    /* background-color: aqua; */
+    background: aqua;
+}
+.HeadStyle {
+    background: #ffff80;
+}
+.RangeStyle {
+    background: #b3ffff;
 }
 /* tr#0 {
     border: thick double #32a1ce;
